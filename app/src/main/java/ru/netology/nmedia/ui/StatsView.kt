@@ -6,7 +6,9 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
+import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.withStyledAttributes
 import ru.netology.nmedia.R
 import ru.netology.nmedia.util.AndroidUtils
@@ -88,7 +90,7 @@ class StatsView @JvmOverloads constructor(
         textSize = fontSize
     }
 
-    var data: List<Float> = emptyList()
+    var data: Float = 0F
         set(value) {
             field = value
             invalidate()
@@ -104,12 +106,25 @@ class StatsView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (data.isEmpty()) {
+
+        if (data !in 0F..100F) {
             return
         }
 
+        paint.color = getColor(context, R.color.back_color)
+        canvas.drawCircle(center.x, center.y, radius, paint)
+
+        var dataL = data
+        val dataPercent = listOf(0F, 0F, 0F, 0F).map {
+            if (dataL >= 25F) {
+                dataL -= 25F
+                0.25F
+            } else {
+                dataL / 100F
+            }
+        }
+
         var startFrom = -90F
-        val dataPercent = data.map { it / data.sum() }
         var zeroPaintColor = 0
         for ((index, datum) in dataPercent.withIndex()) {
             val angle = 360F * datum
@@ -121,10 +136,10 @@ class StatsView @JvmOverloads constructor(
             startFrom += angle
         }
         paint.color = zeroPaintColor
-        canvas.drawArc(oval, startFrom-1, 1F, false, paint)
+        canvas.drawArc(oval, -89F, 1F, false, paint)
 
         canvas.drawText(
-            "%.2f%%".format(dataPercent.sum() * 100),
+            "%.2f%%".format(data),
             center.x,
             center.y + textPaint.textSize / 4,
             textPaint,
