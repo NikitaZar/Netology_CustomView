@@ -8,6 +8,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        findViewById<StatsView>(R.id.stats).data = 95F
+        val view = findViewById<StatsView>(R.id.stats)
+        view.postDelayed({ view.data = 100F }, 3000)
     }
 }
