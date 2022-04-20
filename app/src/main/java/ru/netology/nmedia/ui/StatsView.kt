@@ -132,28 +132,41 @@ class StatsView @JvmOverloads constructor(
         var startFrom = -90F
         var zeroStartFrom = startFrom + 1F
         var zeroPaintColor = 0
+        var datumSum = 0F
+        var progressL = progress
+
         for ((index, datum) in dataPercent.withIndex()) {
             val angle = 360F * datum
             paint.color = colors.getOrNull(index) ?: randomColor()
+
             if (index == 0 && progress == 1F) {
                 zeroPaintColor = paint.color
                 zeroStartFrom = startFrom
             }
+
+            val sweepAngel = angle * progressL * 4
             canvas.drawArc(
                 oval,
-                startFrom + (progress * 360F),
-                angle * progress,
-                false, paint
+                startFrom,
+                sweepAngel,
+                false,
+                paint
             )
 
-            if (progress == 1F) {
-                paint.color = zeroPaintColor
-                canvas.drawArc(oval, zeroStartFrom, 1F, false, paint)
-            }
-
+            datumSum += datum
             startFrom += angle
+
+            if (progress < datumSum) {
+                break
+            } else {
+                progressL = progress - datumSum
+            }
         }
 
+        if (progress == 1F) {
+            paint.color = zeroPaintColor
+            canvas.drawArc(oval, zeroStartFrom, 1F, false, paint)
+        }
         canvas.drawText(
             "%.2f%%".format(data * progress),
             center.x,
@@ -176,7 +189,7 @@ class StatsView @JvmOverloads constructor(
                 progress = anim.animatedValue as Float
                 invalidate()
             }
-            duration = 3000
+            duration = 10000
             interpolator = LinearInterpolator()
         }.also {
             it.start()
