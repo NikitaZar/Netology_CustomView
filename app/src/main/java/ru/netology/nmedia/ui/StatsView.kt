@@ -119,21 +119,14 @@ class StatsView @JvmOverloads constructor(
         paint.color = getColor(context, R.color.back_color)
         canvas.drawCircle(center.x, center.y, radius, paint)
 
-        var dataL = data
-        val dataPercent = listOf(0F, 0F, 0F, 0F).map {
-            if (dataL >= 25F) {
-                dataL -= 25F
-                0.25F
-            } else {
-                dataL / 100F
-            }
-        }
+        val dataL = data
+        val dataPercent = listOf(0F, 0F, 0F, 0F).map { dataL / 100F }
 
         var startFrom = -90F
         var zeroStartFrom = startFrom + 1F
         var zeroPaintColor = 0
         for ((index, datum) in dataPercent.withIndex()) {
-            val angle = 360F * datum
+            val angle = 90F * datum
             paint.color = colors.getOrNull(index) ?: randomColor()
             if (index == 0 && progress == 1F) {
                 zeroPaintColor = paint.color
@@ -143,7 +136,8 @@ class StatsView @JvmOverloads constructor(
                 oval,
                 startFrom + (progress * 360F),
                 angle * progress,
-                false, paint
+                false,
+                paint
             )
 
             if (progress == 1F) {
@@ -151,7 +145,7 @@ class StatsView @JvmOverloads constructor(
                 canvas.drawArc(oval, zeroStartFrom, 1F, false, paint)
             }
 
-            startFrom += angle
+            startFrom += 90F
         }
 
         canvas.drawText(
