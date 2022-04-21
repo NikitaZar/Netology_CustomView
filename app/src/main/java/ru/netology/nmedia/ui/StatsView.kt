@@ -16,6 +16,10 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.util.AndroidUtils
 import kotlin.math.min
 import kotlin.random.Random
+import android.view.View.ROTATION as ROTATION1
+
+const val TYPE_ROTATION = 0
+const val TYPE_SEQUENTIAL = 1
 
 class StatsView @JvmOverloads constructor(
     context: Context,
@@ -30,7 +34,7 @@ class StatsView @JvmOverloads constructor(
     private var lineWidth = AndroidUtils.dp(context, 5F).toFloat()
     private var fontSize = AndroidUtils.dp(context, 40F).toFloat()
     private var colors = emptyList<Int>()
-
+    private var animationType = 0
     private var progress = 0F
     private var valueAnimator: ValueAnimator? = null
 
@@ -80,6 +84,8 @@ class StatsView @JvmOverloads constructor(
                     randomColor()
                 )
             )
+
+            animationType = getInteger(R.styleable.StatsView_animationType, 0)
         }
     }
 
@@ -115,6 +121,39 @@ class StatsView @JvmOverloads constructor(
         if (data !in 0F..100F) {
             return
         }
+
+        when (animationType) {
+            TYPE_ROTATION -> {
+                rotate(canvas)
+            }
+            TYPE_SEQUENTIAL -> {
+                sequent(canvas)
+            }
+        }
+    }
+
+    private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
+
+    private fun update() {
+        valueAnimator?.let {
+            it.removeAllListeners()
+            it.cancel()
+        }
+        progress = 0F
+
+        valueAnimator = ValueAnimator.ofFloat(0F, 1F).apply {
+            addUpdateListener { anim ->
+                progress = anim.animatedValue as Float
+                invalidate()
+            }
+            duration = 3000
+            interpolator = LinearInterpolator()
+        }.also {
+            it.start()
+        }
+    }
+
+    private fun rotate(canvas: Canvas) {
 
         paint.color = getColor(context, R.color.back_color)
         canvas.drawCircle(center.x, center.y, radius, paint)
@@ -156,24 +195,75 @@ class StatsView @JvmOverloads constructor(
         )
     }
 
-    private fun randomColor() = Random.nextInt(0xFF000000.toInt(), 0xFFFFFFFF.toInt())
+    private fun sequent(canvas: Canvas) {
+        paint.color = getColor(context, R.color.back_color)
+        canvas.drawCircle(center.x, center.y, radius, paint)
 
-    private fun update() {
-        valueAnimator?.let {
-            it.removeAllListeners()
-            it.cancel()
-        }
-        progress = 0F
-
-        valueAnimator = ValueAnimator.ofFloat(0F, 1F).apply {
-            addUpdateListener { anim ->
-                progress = anim.animatedValue as Float
-                invalidate()
+        var dataL = data
+        val dataPercent = listOf(25F, 25F, 25F, 25F).map {
+            if (dataL >= it) {
+                dataL -= it
+                it / 100F
+            } else {
+                val res = dataL / 100F
+                dataL = 0F
+                res
             }
-            duration = 3000
-            interpolator = LinearInterpolator()
-        }.also {
-            it.start()
         }
+
+        var startFrom = -90F
+        var zeroStartFrom = startFrom + 1F
+        var zeroPaintColor = 0
+        var datumSum = 0F
+        val dataTarget = data * progress
+        val progressTarget = dataTarget / 100F
+        for ((index, datum) in dataPercent.withIndex()) {
+            val angle = 360F * datum
+            paint.color = colors.getOrNull(index) ?: randomColor()
+
+            if (index == 0 && progress == 1F) {
+                zeroPaintColor = paint.color
+                zeroStartFrom = startFrom
+            }
+
+            val progressSeg = if (progressTarget <= datumSum + datum) {
+                progressTarget - datumSum
+            } else {
+                datum
+            } * 4
+            datumSum += datum
+            val sweepAngel = angle * progressSeg
+
+            Log.i("onDraw", "index=$index")
+            Log.i("onDraw", "progressSeg=$progressSeg")
+            Log.i("onDraw", "progressTarget=$progressTarget")
+            Log.i("onDraw", "sweepAngel=$sweepAngel")
+            Log.i("onDraw", "____")
+
+            canvas.drawArc(
+                oval,
+                startFrom,
+                sweepAngel,
+                false,
+                paint
+            )
+
+            startFrom += angle
+
+            if (progressTarget < datumSum) {
+                break
+            }
+        }
+
+        if (progress == 1F) {
+            paint.color = zeroPaintColor
+            canvas.drawArc(oval, zeroStartFrom, 1F, false, paint)
+        }
+        canvas.drawText(
+            "%.2f%%".format(dataTarget),
+            center.x,
+            center.y + textPaint.textSize / 4,
+            textPaint,
+        )
     }
 }

@@ -8,7 +8,11 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val view = findViewById<StatsView>(R.id.stats)
-        view.postDelayed({ view.data = 100F }, 3000)
+        val viewRotation = findViewById<StatsView>(R.id.stats_rotation)
+        viewRotation.postDelayed({ viewRotation.data = 60F }, 2000)
+
+
+        val viewSequential = findViewById<StatsView>(R.id.stats_sequential)
+        viewSequential.postDelayed({ viewSequential.data = 80F }, 7000)
     }
 }

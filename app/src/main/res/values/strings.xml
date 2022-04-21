@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">NMedia</string>
+    <string name="rotation" translatable="false">Rotation</string>
+    <string name="sequential" translatable="false">Sequential</string>
 </resources>
