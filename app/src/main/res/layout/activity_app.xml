@@ -49,6 +49,41 @@
             app:color4="#FF0266"
             app:fontSize="50dp"
             app:lineWidth="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bidirectional"
+            android:textSize="28sp" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <ru.netology.nmedia.ui.StatsView
+                android:id="@+id/stats_bidirectional"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_gravity="center"
+                app:animationType="bidirectional"
+                app:color1="@color/colorPrimary"
+                app:color2="@color/colorAccent"
+                app:color3="#FFDE03"
+                app:color4="#FF0266"
+                app:fontSize="50dp"
+                app:lineWidth="20dp" />
+
+            <ImageView
+                android:id="@+id/ic_netology"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_gravity="center"
+                android:background="@color/white_color"
+                android:padding="100dp"
+                android:src="@drawable/ic_netology_original_48dp" />
+
+        </FrameLayout>
     </LinearLayout>
 </ScrollView>
 

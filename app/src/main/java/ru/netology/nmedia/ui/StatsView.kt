@@ -16,10 +16,10 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.util.AndroidUtils
 import kotlin.math.min
 import kotlin.random.Random
-import android.view.View.ROTATION as ROTATION1
 
 const val TYPE_ROTATION = 0
 const val TYPE_SEQUENTIAL = 1
+const val TYPE_BIDIRECTIONAL = 2
 
 class StatsView @JvmOverloads constructor(
     context: Context,
@@ -129,6 +129,9 @@ class StatsView @JvmOverloads constructor(
             TYPE_SEQUENTIAL -> {
                 sequent(canvas)
             }
+            TYPE_BIDIRECTIONAL -> {
+                bidirectional(canvas)
+            }
         }
     }
 
@@ -234,12 +237,6 @@ class StatsView @JvmOverloads constructor(
             datumSum += datum
             val sweepAngel = angle * progressSeg
 
-            Log.i("onDraw", "index=$index")
-            Log.i("onDraw", "progressSeg=$progressSeg")
-            Log.i("onDraw", "progressTarget=$progressTarget")
-            Log.i("onDraw", "sweepAngel=$sweepAngel")
-            Log.i("onDraw", "____")
-
             canvas.drawArc(
                 oval,
                 startFrom,
@@ -261,6 +258,56 @@ class StatsView @JvmOverloads constructor(
         }
         canvas.drawText(
             "%.2f%%".format(dataTarget),
+            center.x,
+            center.y + textPaint.textSize / 4,
+            textPaint,
+        )
+    }
+
+    private fun bidirectional(canvas: Canvas) {
+
+        paint.color = getColor(context, R.color.back_color)
+        canvas.drawCircle(center.x, center.y, radius, paint)
+
+        val dataL = data
+        val dataPercent = listOf(0F, 0F, 0F, 0F).map { dataL / 100F }
+
+        var startFrom = -45F
+        var zeroStartFrom = startFrom + 1F
+        var zeroPaintColor = 0
+
+        for ((index, datum) in dataPercent.withIndex()) {
+            val angle = 45F * datum
+            paint.color = colors.getOrNull(index) ?: randomColor()
+            if (index == 0 && progress == 1F) {
+                zeroPaintColor = paint.color
+                zeroStartFrom = startFrom
+            }
+            canvas.drawArc(
+                oval,
+                startFrom,
+                angle * progress,
+                false,
+                paint
+            )
+
+            canvas.drawArc(
+                oval,
+                startFrom,
+                angle * progress * -1F,
+                false,
+                paint
+            )
+            if (progress == 1F) {
+                paint.color = zeroPaintColor
+                canvas.drawArc(oval, zeroStartFrom, 1F, false, paint)
+            }
+
+            startFrom += 90F
+        }
+
+        canvas.drawText(
+            "%.2f%%".format(data * progress),
             center.x,
             center.y + textPaint.textSize / 4,
             textPaint,
