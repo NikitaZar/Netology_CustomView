@@ -120,12 +120,14 @@ class StatsView @JvmOverloads constructor(
         canvas.drawCircle(center.x, center.y, radius, paint)
 
         var dataL = data
-        val dataPercent = listOf(0F, 0F, 0F, 0F).map {
-            if (dataL >= 25F) {
-                dataL -= 25F
-                0.25F
+        val dataPercent = listOf(25F, 25F, 25F, 25F).map {
+            if (dataL >= it) {
+                dataL -= it
+                it / 100F
             } else {
-                dataL / 100F
+                val res = dataL / 100F
+                dataL = 0F
+                res
             }
         }
 
@@ -133,8 +135,8 @@ class StatsView @JvmOverloads constructor(
         var zeroStartFrom = startFrom + 1F
         var zeroPaintColor = 0
         var datumSum = 0F
-        var progressL = progress
-
+        val dataTarget = data * progress
+        val progressTarget = dataTarget / 100F
         for ((index, datum) in dataPercent.withIndex()) {
             val angle = 360F * datum
             paint.color = colors.getOrNull(index) ?: randomColor()
@@ -144,7 +146,20 @@ class StatsView @JvmOverloads constructor(
                 zeroStartFrom = startFrom
             }
 
-            val sweepAngel = angle * progressL * 4
+            val progressSeg = if (progressTarget <= datumSum + datum) {
+                progressTarget - datumSum
+            } else {
+                datum
+            } * 4
+            datumSum += datum
+            val sweepAngel = angle * progressSeg
+
+            Log.i("onDraw", "index=$index")
+            Log.i("onDraw", "progressSeg=$progressSeg")
+            Log.i("onDraw", "progressTarget=$progressTarget")
+            Log.i("onDraw", "sweepAngel=$sweepAngel")
+            Log.i("onDraw", "____")
+
             canvas.drawArc(
                 oval,
                 startFrom,
@@ -153,13 +168,10 @@ class StatsView @JvmOverloads constructor(
                 paint
             )
 
-            datumSum += datum
             startFrom += angle
 
-            if (progress < datumSum) {
+            if (progressTarget < datumSum) {
                 break
-            } else {
-                progressL = progress - datumSum
             }
         }
 
@@ -168,7 +180,7 @@ class StatsView @JvmOverloads constructor(
             canvas.drawArc(oval, zeroStartFrom, 1F, false, paint)
         }
         canvas.drawText(
-            "%.2f%%".format(data * progress),
+            "%.2f%%".format(dataTarget),
             center.x,
             center.y + textPaint.textSize / 4,
             textPaint,
@@ -189,7 +201,7 @@ class StatsView @JvmOverloads constructor(
                 progress = anim.animatedValue as Float
                 invalidate()
             }
-            duration = 10000
+            duration = 5000
             interpolator = LinearInterpolator()
         }.also {
             it.start()
