@@ -13,6 +13,11 @@
         <attr name="color8" format="color|reference" />
         <attr name="color9" format="color|reference" />
         <attr name="color10" format="color|reference" />
+        <attr name="animationType" format="enum">
+            <enum name="rotation" value="0"/>
+            <enum name="sequential" value="1"/>
+            <enum name="bidirectional" value="2"/>
+        </attr>
     </declare-styleable>
 </resources>
 

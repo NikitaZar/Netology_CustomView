@@ -6,4 +6,5 @@
     <color name="divider_color">#ccc</color>
     <color name="back_color">#ccdd</color>
     <color name="red">#ff0000</color>
+    <color name="white_color">#ffffff</color>
 </resources>
