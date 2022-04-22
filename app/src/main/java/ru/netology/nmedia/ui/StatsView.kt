@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
 import androidx.core.content.ContextCompat.getColor
@@ -218,8 +217,8 @@ class StatsView @JvmOverloads constructor(
         var zeroStartFrom = startFrom + 1F
         var zeroPaintColor = 0
         var datumSum = 0F
-        val dataTarget = data * progress
-        val progressTarget = dataTarget / 100F
+        val dataInProgress = data * progress
+        val dataInProgressL = dataInProgress / 100F
         for ((index, datum) in dataPercent.withIndex()) {
             val angle = 360F * datum
             paint.color = colors.getOrNull(index) ?: randomColor()
@@ -229,11 +228,11 @@ class StatsView @JvmOverloads constructor(
                 zeroStartFrom = startFrom
             }
 
-            val progressSeg = if (progressTarget <= datumSum + datum) {
-                progressTarget - datumSum
+            val progressSeg = if (dataInProgressL <= datumSum + datum) {
+                dataInProgressL - datumSum
             } else {
                 datum
-            } * 4
+            } * dataPercent.size
             datumSum += datum
             val sweepAngel = angle * progressSeg
 
@@ -247,7 +246,7 @@ class StatsView @JvmOverloads constructor(
 
             startFrom += angle
 
-            if (progressTarget < datumSum) {
+            if (dataInProgressL < datumSum) {
                 break
             }
         }
@@ -257,7 +256,7 @@ class StatsView @JvmOverloads constructor(
             canvas.drawArc(oval, zeroStartFrom, 1F, false, paint)
         }
         canvas.drawText(
-            "%.2f%%".format(dataTarget),
+            "%.2f%%".format(dataInProgress),
             center.x,
             center.y + textPaint.textSize / 4,
             textPaint,
